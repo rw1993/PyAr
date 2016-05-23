@@ -1,0 +1,50 @@
+from arma import ARMA
+#from expand_predicter import *
+from similar_expand_predicter import *
+#from yule_walker_impute_predicter import *
+#from kalman_impute_predicter import *
+#from ogd_impute_predicter import *
+import random
+import pickle
+import sys
+from matplotlib import pyplot
+
+
+
+missing_percent = 0.1
+#a = ARMA([0.3, -0.4, 0.4, -0.5, 0.6], [-0.2, 0.3], 0.1)
+a = ARMA([0.3, -0.4, 0.4, -0.5, 0.6], [], 0.1)
+#a = ARMA([0.4, 0.5], [], 0.02 ** 0.5)
+#a = ARMA([0.4, 0.1], [], 0.05 ** 0.5)
+#a = ARMA([0.4, 0.6], [], 0.14 ** 0.5)
+a = ARMA([0.25, 0.23, 0.19], [], 0.07 ** 0.5)
+time_series = [a.generater.next() for i in range(2000)]
+p = ArPredicter(len(a.alphas), max_x = max(time_series))
+
+def run_test():
+    for index, x in enumerate(time_series):
+        print index
+        if index < 6:
+            p.predict_and_fit(x)
+        elif random.random() > missing_percent:
+            rec_x = p.predict_and_fit(x)
+        else:
+            p.predict_and_fit('*')
+    plot(p)
+    '''
+    with open("p", "wb") as f:
+        pickle.dump(p, f)
+    '''
+
+def plot(p):
+    serrors = [error*error for error in p.errors]
+    xs = [index for index, e in enumerate(serrors)]
+    ys = [sum(serrors[:index+1])/(index+1) for index, e in enumerate(serrors)]
+    print ys[-1]
+    #pyplot.plot(xs, ys,'g^',xs, ys1)
+    pyplot.plot(xs, ys)
+    pyplot.show()
+
+
+if __name__ == '__main__':
+    run_test()
