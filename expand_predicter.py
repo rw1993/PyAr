@@ -23,6 +23,7 @@ class ArPredicter(Predicter, PredicterMixin ):
 
     def fit(self, predict_x, ob_x):
         if ob_x == '*':
+            self.xs.append(ob_x)
             return
         past_d_xs = self.xs[-self.d:]
         expand_xs = self.expand_xs(past_d_xs)
