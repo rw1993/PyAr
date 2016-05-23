@@ -30,6 +30,7 @@ class ArPredicter(Predicter, PredicterMixin ):
         self.ws = -self.learning_rate * self.last
         norm = np.linalg.norm(self.last)
         self.ws = self.ws / max(1.0, self.learning_rate / self.D * norm)
+        self.xs.append(ob_x)
         
     def predict(self):
         past_d_xs = self.xs[-self.d:]

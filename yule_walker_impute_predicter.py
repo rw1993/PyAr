@@ -13,7 +13,6 @@ class ArPredicter(Predicter, PredicterMixin):
         super(ArPredicter, self).__init__()
         self.p = p
         self.min_ob = self.p + 1
-        self.impute = True
         self.no_missing_in_min_ob = True
         
 
@@ -22,7 +21,10 @@ class ArPredicter(Predicter, PredicterMixin):
         return self.ws.dot(past_p_xs)
 
     def fit(self, pre_x, ob_x):
-        pass
+        if ob_x == '*':
+            self.xs.append(pre_x)
+            return
+        self.xs.append(ob_x)
 
     @property
     def ws(self):

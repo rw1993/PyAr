@@ -14,7 +14,6 @@ class ArPredicter(Predicter, PredicterMixin, ):
         self.ws = [0 for i in range(self.p)]
         self.w_range = w_range
         self.learning_rate = learning_rate
-        self.impute = True
         self.min_ob = self.p
         self.no_missing_in_min_ob = True
 
@@ -24,6 +23,9 @@ class ArPredicter(Predicter, PredicterMixin, ):
         return ws.dot(past_p_xs)
 
     def fit(self, predict_x, ob_x):
+        if ob_x == '*':
+            self.xs.append(predict_x)
+            return
         past_p_xs = self.xs[-self.p:]
         deltas = map(lambda x:x*(predict_x-ob_x), past_p_xs)
         ws_deltas = zip(self.ws, deltas)
@@ -33,3 +35,4 @@ class ArPredicter(Predicter, PredicterMixin, ):
                 return self.w_range if result > 0 else - self.w_range
             return result
         self.ws = map(update, ws_deltas)
+        self.xs.append(ob_x)

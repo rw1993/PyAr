@@ -22,12 +22,15 @@ class ArPredicter(Predicter, PredicterMixin, ):
         self.min_ob = self.d
 
     def fit(self, predict_x, ob_x):
+        if ob_x == '*':
+            return
         past_d_xs = self.xs[-self.d:]
         expand_xs = self.expand_xs(past_d_xs)
         self.last = self.last + (predict_x - ob_x) * expand_xs
         self.ws = -self.learning_rate * self.last
         norm = np.linalg.norm(self.last)
         self.ws = self.ws / max(1.0, self.learning_rate / self.D * norm)
+        self.xs.append(ob_x)
         
     def predict(self):
         past_d_xs = self.xs[-self.d:]
