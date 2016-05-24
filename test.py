@@ -1,6 +1,7 @@
 from arma import ARMA
 #from expand_predicter import *
-from e_expand_predicter import *
+#from e_expand_predicter import *
+from hash_e_expand_predicter import *
 #from similar_expand_predicter import *
 #from yule_walker_impute_predicter import *
 #from kalman_impute_predicter import *
@@ -12,17 +13,17 @@ from matplotlib import pyplot
 
 
 
-missing_percent = 0.1
+missing_percent = 0.3
 #a = ARMA([0.3, -0.4, 0.4, -0.5, 0.6], [-0.2, 0.3], 0.1)
-#a = ARMA([0.3, -0.4, 0.4, -0.5, 0.6], [], 0.1)
+a = ARMA([0.3, -0.4, 0.4, -0.5, 0.6], [], 0.2)
 #a1 = ARMA([0.4, 0.5], [], 0.02 ** 0.5)
 #a1 = ARMA([0.4, 0.1], [], 0.05 ** 0.5)
 #a1 = ARMA([0.4, 0.6], [], 0.14 ** 0.5)
 #a1 = ARMA([0.25, 0.23, 0.19], [], 0.07 ** 0.5)
-a1 = ARMA([0.02, 0.50, 0.036], [], 0.16 ** 0.5)
-time_series = [a1.generater.next() for i in range(1000)]
+#a1 = ARMA([0.02, 0.50, 0.036], [], 0.16 ** 0.5)
+time_series = [a.generater.next() for i in range(1000)]
 #time_series += [a2.generater.next() for i in range(500)]
-p = ArPredicter(len(a1.alphas), max_x = max(time_series))
+p = ArPredicter(len(a.alphas), max_x = max(time_series))
 
 def run_test():
     for index, x in enumerate(time_series):
