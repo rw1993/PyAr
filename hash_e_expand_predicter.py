@@ -1,20 +1,22 @@
 # -*- coding: utf-8 -*-
 # author: rw
 # E-mail: weiyanjie10@gmail.com
-import e_expand_predicter 
+import e_expand_predicter
+from collections import OrderedDict
 
 
 class ArPredicter(e_expand_predicter.ArPredicter, ):
 
     def __init__(self, p, missing_ability=3.0, max_x=1.0,
-                 learning_rate=0.003):
+                 learning_rate=0.003, cache_size=2000):
         super(ArPredicter, self).__init__(p=p,
                                           missing_ability=missing_ability,
                                           max_x=max_x,
                                           learning_rate=learning_rate)
         self.hit = 0
         self.total = 0
-        self.cache = {}
+        self.cache = OrderedDict({})
+        self.cache_size = cache_size
 
     def K(self, s, t):
         self.total += 1
@@ -35,9 +37,13 @@ class ArPredicter(e_expand_predicter.ArPredicter, ):
         s_key = (key2, key1)
         if self.cache.has_key(f_key):
             cs = self.cache[f_key]
+            self.cache.pop(f_key)
+            self.cache[f_key] = cs
             self.hit += 1
         elif self.cache.has_key(s_key):
             cs = self.cache[s_key]
+            self.cache.pop(s_key)
+            self.cache[s_key] = cs
             self.hit += 1
         else:
             cs = []
@@ -55,6 +61,8 @@ class ArPredicter(e_expand_predicter.ArPredicter, ):
                     if s_t1[0] == s_t1[1] == '*':
                         c += 1
                 cs.append(c)
+            if len(self.cache.keys()) == self.cache_size:
+                self.cache.popitem(last=False)
             self.cache[s_key] = cs
         for c, x, x1 in zip(cs, s_xs, t_xs):
             if c == -1:
