@@ -14,39 +14,48 @@ class ArPredicter(Predicter, PredicterMixin):
         self.p = p
         self.min_ob = self.p + 1
         self.no_missing_in_min_ob = True
+        self._ws = [0 for i in range(self.p)]
+        self._r = [0 for i in range(self.p+1)]
+        self.N = {}
         
 
     def predict(self):
         past_p_xs = self.xs[-self.p:][::-1]
-        return self.ws.dot(past_p_xs)
+        try:
+            return self.ws.dot(past_p_xs)
+        except:
+            print "too early"
+            return 0
 
     def fit(self, pre_x, ob_x):
         if ob_x == '*':
             self.xs.append(pre_x)
             return
         self.xs.append(ob_x)
+        for i in range(self.p+1):
+            self.update_r(i)
+
+    def update_r(self, i):
+        if i >= len(self.xs):
+            return 
+        N = self.N.get(i, 0)
+        r_i = N * self._r[i]
+        r_i += self.xs[-1] * self.xs[-1-i]
+        r_i = r_i / float(N + 1)
+        self._r[i] = r_i
+        #print r_i, i
+        self.N[i] = N + 1
 
     @property
     def ws(self):
-        c0 = sum([x*x for x in self.xs]) / len(self.xs)
-        c0 = float(c0)
-        #print 'c0',c0
-        xs = self.xs[::-1]
-
-        def r(i):
-            x_xis = [x * xs[index+i] for index, x in enumerate(xs) if index+i<len(xs)]
-            #if len(x_xis) == 0:
-                #print i,xs
-            ci = sum(x_xis) / len(x_xis)
-
-            return ci/c0
-
-        rs_left = [r(i+1) for i in range(self.p)]
-        rs_right = [r(i) for i in range(self.p)]
+        rs_left = [self._r[i+1] for i in range(self.p)]
+        rs_right = [self._r[i] for i in range(self.p)]
         r_matrix = [rs_right,]
         for i in range(self.p - 1):
             rs_right = [rs_right[-1]] + rs_right[:-1]
             r_matrix.append(rs_right)
         r_matrix =np.array(r_matrix)
         rs_left = np.array(rs_left)
+        #print r_matrix
+        #print self.xs
         return np.linalg.inv(r_matrix).dot(rs_left)

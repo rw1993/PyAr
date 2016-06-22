@@ -22,12 +22,12 @@ class ArPredicter(Predicter, PredicterMixin, ):
     def predict(self):
         return self.predict_xs[-1]
 
-    def weight(self, x, y, bandwith=600, tp=1):
+    def weight(self, x, y, bandwith=1000, tp=1):
         if tp == 1:
             import math
             return math.e ** (-(x-y) ** 2 / bandwith ** 2)
         else:
-            return 1 if x-y<600 else 0
+            return 1 if x-y<100 else 0
 
     def fit(self, pre_x, ob_x):
         if ob_x == '*':
