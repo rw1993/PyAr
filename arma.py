@@ -53,9 +53,11 @@ class ARMA(object, ):
 
             self.xs.append(x)
             self.noises.append(n)
+            '''
             if abs(x) > 1:
                 if x > 0:
                     x = 1
                 else:
                     x = -1
+            '''
             yield x

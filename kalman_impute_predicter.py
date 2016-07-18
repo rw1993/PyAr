@@ -20,9 +20,9 @@ class ArPredicter(Predicter, PredicterMixin, ):
         self.row = [0 for i in range(self.p)]
         self.filter_state_covariance = filtered_state_covariance = np.array([copy.deepcopy(self.row) for i in range(self.p)])
         for index, row in enumerate(self.filter_state_covariance):
-            row[index] = 99999999.0
+            row[index] = 9999999.0
         self.w_range = w_range
-        self.kalman = pykalman.KalmanFilter()
+        self.kalman = pykalman.KalmanFilter(em_vars=['initial_state_mean','initial_state_covariance'])
         self.min_ob = self.p
 
     def predict(self):

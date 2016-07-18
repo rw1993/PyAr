@@ -71,12 +71,12 @@ class ArPredicter(object, ):
 
 
 if __name__ == "__main__":
-    a = ARMA([0.3, -0.4, 0.4, -0.5, 0.6], [], 0.3)
+    #a = ARMA([0.3, -0.4, 0.4, -0.5, 0.6], [], 0.3)
+    a = ARMA([0.4, 0.5], [], 0.02 ** 0.5)
     time_series = [a.generater.next() for i in range(4000)]
-    missing_rate = 0.3
+    missing_rate = 0.2
     if_missing = [1 if random.random() > missing_rate or time_series.index(t) < 6 else 0 for t in time_series]
     time_series = [t if flag==1 else 0 for t, flag in zip(time_series,if_missing)]
     missing_indexs = [index for index, flag in enumerate(if_missing) if flag == 0]
-    p = ArPredicter(5, time_series, missing_indexs)
+    p = ArPredicter(2, time_series, missing_indexs)
     print sum(p.ses)/(4000 - len(missing_indexs))
-    print sum(p.ses)/4000
