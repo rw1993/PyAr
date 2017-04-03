@@ -8,7 +8,7 @@ from predicter_mixin import PredicterMixin
 
 class ArPredicter(Predicter, PredicterMixin, ):
 
-    def __init__(self, p, max_x, learning_rate=0.003, w_range=1):
+    def __init__(self, p, max_x, learning_rate=0.03, w_range=1):
         super(ArPredicter, self).__init__()
         self.p = p
         self.ws = [0 for i in range(self.p)]
@@ -16,11 +16,13 @@ class ArPredicter(Predicter, PredicterMixin, ):
         self.learning_rate = learning_rate
         self.min_ob = self.p
         self.no_missing_in_min_ob = True
+        self.max_x = max_x
 
     def predict(self):
         past_p_xs = np.array(self.xs[-self.p:])
         ws = np.array(self.ws)
-        return ws.dot(past_p_xs)
+        r = ws.dot(past_p_xs)
+        return r
 
     def fit(self, predict_x, ob_x):
         if ob_x == '*':

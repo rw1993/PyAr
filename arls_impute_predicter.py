@@ -6,6 +6,8 @@ import copy
 from sklearn import linear_model
 from arma import ARMA
 import random
+import pickle
+import stock_test
 
 
 class ArPredicter(object, ):
@@ -54,11 +56,13 @@ class ArPredicter(object, ):
             return error
         print "imputing"
         errors = map(impute, self.missing_indexs)
+        if len(errors) == 0:
+            return clf, 0.0
         return clf, max(errors)
     
     @property
-    def ses(self):
-        ses = []
+    def errors(self):
+        errors = []
         for index, x in enumerate(self.time_series):
             if index < self.p:
                 continue
@@ -66,17 +70,58 @@ class ArPredicter(object, ):
                 continue
             xs = self.time_series[index-self.p:index]
             y = self.clf.predict(xs)
-            ses.append((y-self.time_series[index])**2)
-        return ses
+            errors.append(y-self.time_series[index])
+        return errors
 
+    @property
+    def mse(self):
+        errors = self.errors
+        return sum([e*e for e in self.errors])/len(self.errors)
+
+def run_test(missing_rate, name, time=20, noise_type="normal"):
+    result = {}
+    result["name"] = name
+    result["errors"] = []
+    result["mses"] = []
+
+    def run_a_test():
+        #a = ARMA([0.3, -0.4, 0.4, -0.5, 0.6], [], 0.3, noise_type)
+        a = ARMA([-0.5, 0.11], [], 0.5, noise_type)
+        time_series = [a.generater.next() for i in range(2000)]
+        if_missing = [1 if random.random() > missing_rate or time_series.index(t) < 6 else 0 for t in time_series]
+        time_series = [t if flag==1 else 0 for t, flag in zip(time_series,if_missing)]
+        missing_indexs = [index for index, flag in enumerate(if_missing) if flag == 0]
+        p = ArPredicter(a.p, time_series, missing_indexs)
+        result['errors'].append(p.errors)
+        result['mses'].append(p.mse)
+
+    for i in range(time):
+        print i
+        run_a_test()
+    pickle.dump(result, open(noise_type+"_result_"+name+str(missing_rate), "wb"))
+    return sum(result['mses']) / time
+
+def run_stock_test(p, missing_rate, name, time=20, noise_type="normal"):
+    result = {}
+    result["name"] = name
+    result["errors"] = []
+    result["mses"] = []
+
+    def run_a_test():
+        time_series = stock_test.get_stock_data()
+        if_missing = [1 if random.random() > missing_rate or time_series.index(t) < 6 else 0 for t in time_series]
+        time_series = [t if flag==1 else 0 for t, flag in zip(time_series,if_missing)]
+        missing_indexs = [index for index, flag in enumerate(if_missing) if flag == 0]
+        predicter = ArPredicter(p, time_series, missing_indexs)
+        result['errors'].append(predicter.errors)
+        result['mses'].append(predicter.mse)
+
+    for i in range(time):
+        print i
+        run_a_test()
+    pickle.dump(result, open(str(p)+"result_"+name+str(missing_rate), "wb"))
+    return sum(result['mses']) / time
 
 if __name__ == "__main__":
-    #a = ARMA([0.3, -0.4, 0.4, -0.5, 0.6], [], 0.3)
-    a = ARMA([0.4, 0.5], [], 0.02 ** 0.5)
-    time_series = [a.generater.next() for i in range(4000)]
-    missing_rate = 0.2
-    if_missing = [1 if random.random() > missing_rate or time_series.index(t) < 6 else 0 for t in time_series]
-    time_series = [t if flag==1 else 0 for t, flag in zip(time_series,if_missing)]
-    missing_indexs = [index for index, flag in enumerate(if_missing) if flag == 0]
-    p = ArPredicter(2, time_series, missing_indexs)
-    print sum(p.ses)/(4000 - len(missing_indexs))
+    for mr in stock_test.missing_percents:
+        print run_stock_test(stock_test.order, mr, name="arls")

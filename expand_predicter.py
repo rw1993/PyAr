@@ -9,7 +9,7 @@ from predicter_mixin import PredicterMixin
 class ArPredicter(Predicter, PredicterMixin ):
 
     def __init__(self, p, missing_ability=3, max_x=1.0,
-                 learning_rate=0.003):
+                 learning_rate=0.03):
         super(ArPredicter, self).__init__()
         self.p = p
         self.d = int(p * missing_ability)

@@ -8,16 +8,22 @@ from predicter_mixin import PredicterMixin
 class ArPredicter(Predicter, PredicterMixin, ):
 
     def __init__(self, p, missing_ability=3.0, max_x=1.0,
-                 learning_rate=0.003):
+                 learning_rate=0.03):
         super(ArPredicter, self).__init__()
         self.p = p
         self.d = int(missing_ability*p)
         self.min_ob = self.d
         self.predict_xs = [0,]
         self.Errs = []
-        self.learning_rate = learning_rate
+        self._learning_rate = learning_rate
         self.max_x = max_x
         self.norm = 0
+        self.f = self.d
+
+    @property
+    def learning_rate(self):
+        return self._learning_rate
+        return 1.0 / (float(self.f) ** 0.5) * self._learning_rate
 
     def predict(self):
         return self.predict_xs[-1]
@@ -27,6 +33,7 @@ class ArPredicter(Predicter, PredicterMixin, ):
             Err = 0
         else:
             Err = pre_x - ob_x
+            self.f += 1
         self.xs.append(ob_x)
         self.Errs.append(Err)
         up = 0.0

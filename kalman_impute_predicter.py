@@ -20,15 +20,18 @@ class ArPredicter(Predicter, PredicterMixin, ):
         self.row = [0 for i in range(self.p)]
         self.filter_state_covariance = filtered_state_covariance = np.array([copy.deepcopy(self.row) for i in range(self.p)])
         for index, row in enumerate(self.filter_state_covariance):
-            row[index] = 9999999.0
+            row[index] = 99999999.0
+        self.filter_state_covariance = 1000000000.0
         self.w_range = w_range
         self.kalman = pykalman.KalmanFilter(em_vars=['initial_state_mean','initial_state_covariance'])
         self.min_ob = self.p
+        self.max_x = max_x
 
     def predict(self):
         past_p_xs = np.array(self.xs[-self.p:])
         ws = np.array(self.ws)
-        return ws.dot(past_p_xs)
+        r = ws.dot(past_p_xs)
+        return r
 
     def fit(self, pre_x, ob_x):
         past_p_xs = self.xs[-self.p:]
@@ -37,9 +40,12 @@ class ArPredicter(Predicter, PredicterMixin, ):
         transition_matrix = np.array([copy.deepcopy(self.row) for i in range(self.p)])
         for i in range(self.p):
             transition_matrix[i][i] = 1
+        '''
         observation_matrix = np.array([copy.deepcopy(self.row) for i in range(self.p)])
         for index, x in enumerate(past_p_xs):
             observation_matrix[index][index] = x
+        '''
+        observation_matrix = np.array(past_p_xs)
         observation = ob_x if ob_x!= '*' else None
         f_s_t, f_s_c = self.kalman.filter_update(filtered_state_mean=filtered_state_mean,
                                                  filtered_state_covariance=filtered_state_covariance,

@@ -17,12 +17,18 @@ class ArPredicter(Predicter, PredicterMixin):
         self._ws = [0 for i in range(self.p)]
         self._r = [0 for i in range(self.p+1)]
         self.N = {}
+        self.max_x = max_x
         
 
     def predict(self):
         past_p_xs = self.xs[-self.p:][::-1]
         try:
-            return self.ws.dot(past_p_xs)
+            r = self.ws.dot(past_p_xs)
+            if r > self.max_x:
+                return self.max_x
+            if r < -self.max_x:
+                return -self.max_x
+            return r
         except:
             print "too early"
             return 0
@@ -43,7 +49,6 @@ class ArPredicter(Predicter, PredicterMixin):
         r_i += self.xs[-1] * self.xs[-1-i]
         r_i = r_i / float(N + 1)
         self._r[i] = r_i
-        #print r_i, i
         self.N[i] = N + 1
 
     @property
@@ -56,6 +61,4 @@ class ArPredicter(Predicter, PredicterMixin):
             r_matrix.append(rs_right)
         r_matrix =np.array(r_matrix)
         rs_left = np.array(rs_left)
-        #print r_matrix
-        #print self.xs
         return np.linalg.inv(r_matrix).dot(rs_left)
